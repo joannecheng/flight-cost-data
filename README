@@ -1,0 +1,6 @@
+Python/Google App Engine/Javascript/Polymaps visualization of 
+cost per mile of US flights. Started off as a javascript 
+experiment, so still kind of hacky.
+
+data source: http://ostpxweb.dot.gov/aviation/domfares/web20101.htm
+

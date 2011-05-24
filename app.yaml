@@ -1,0 +1,15 @@
+application: airline-data
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /static/js
+  static_dir: static/js
+
+- url: /stylesheets
+  static_dir: stylesheets
+  
+- url: /.*
+  script: airline_app.py
+  

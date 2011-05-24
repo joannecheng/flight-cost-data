@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Airline Routes (Winter Quarter 2010)</title>
+		<style type="text/css">
+@import url("stylesheets/style.css");
+.grid {
+  stroke: white;
+  stroke-opacity: .4;
+  shape-rendering: crispEdges;
+}
+
+#airline path {
+	stroke-width: 2px;
+	fill: none;
+	stroke-linecap: round;
+}
+    </style>
+	<link rel="stylesheet" href="/stylesheets/base/jquery.ui.all.css">
+	
+	 <script language="JavaScript" src="static/js/protodata.js"></script>
+		<script src="static/js/polymaps.js" rel="polymaps" type="text/javascript" charset="utf-8"></script>
+		<script type="/text/javascript" src="http://tile.cloudmade.com/wml/latest/web-maps-lite.js"></script>
+      	<script src="static/js/jquery-1.5.1.min.js" type="text/javascript" charset="utf-8"></script>
+      	<script src="static/js/jquery-ui-1.8.12.custom.min.js" type="text/javascript" charset="utf-8"></script>
+
+   </head>
+    <body>
+		<div id="map" style="position:absolute; top: 0px; left: 0px; width:100%; height:100%;">
+			<!--script type="text/javascript" src="static/js/maps.js"--></script>
+			<script type="text/javascript">
+			var color = null;
+			$.getJSON("get_scale", 
+				function(data){
+					color = pv.Scale.linear()
+					.domain(data.min, data.mid1, data.mid2, data.max)
+					.range("#3B0", "#FC0", "#930", "#F00");
+				}
+			);
+			var po = org.polymaps;
+			
+
+			var map = po.map()
+				.container(document.getElementById("map").appendChild(po.svg("svg")))
+				.center({lat: 36.952335, lon: -94.7088238,})
+				.zoom(4.5)
+				.zoomRange([3,18])
+				.add(po.interact());
+
+			map.add(po.image().url(po.url("http://{S}tile.cloudmade.com"
+				+ "/9a0f2b8dc3d94c90b67b1e0d2a0792dd" 
+			   + "/998/256/{Z}/{X}/{Y}.png")
+				.hosts(["a.", "b.", "c.", ""])));
+			map.add(po.compass().pan("none"));
+
+			$(document).ready(function() {
+				
+				var city1 = "";
+				$.getJSON("get_cities", function(data){
+					$('#tags').autocomplete({source: data.cities, 
+						select: function(event, ui){
+							//$("#results").append("<br />"+ui.item.value);
+							city1 = ui.item.value;
+							$.ajax({
+								url: "get_other_cities?city1="+ui.item.value, 
+								type: "GET",
+								dataType: 'json',
+								success: function(data){
+									$("#tags2").html("<option></option>");
+									for(var d in data){ 
+										$("#tags2").append("<option value='"+data[d].id+"'>"+data[d].label+"</option>");
+									}
+								}
+							});
+						}
+					});
+					}
+				);
+				
+				$("#tags2").change(function(){
+					var route = $(this).val();
+					var city2 = $("#tags2 option:selected").text();
+					$.getJSON("get_route?route="+route, function(data){
+						$("#results").append("<option value="+route+">"+city1+" - " +city2+" | Dist:"+data.properties.distance+"mi  Avg Cost:$"+data.properties.avg_one_way_fare+"</option>");
+					});
+					map.add(po.geoJson()
+						.url("get_route?route="+route)
+						.id("airline")
+						.tile(false)
+						.on("load", po.stylist()
+							.attr("stroke", function(d) { return color(d.properties.cost_per_mile).color; } )));
+				});
+				
+			});			
+			</script>
+		</div>
+		<div id="city-selection" class="transparent" style="position:absolute; bottom:15px;left:20px;width:400px;height:185px; background-color:#ffffdd;">
+			<div id="selectbox" style="margin: 5px;">
+				<form>
+					Starting City: <input class="complete" id="tags" size="18"/>
+					<select id="tags2" name="city2" style="margin:5px; width:170px;"></select>
+					<br /><select id="results" size="8"></select>
+					<br /><a href="http://ostpxweb.dot.gov/aviation/domfares/web20101.htm">source</a> 
+					| contact: chengjoanne2 AT gmail dot com 
+					<br /><font color="red">More expensive per mile</font> <font color="green">Less expensive per mile</font> | Work in progress, suggestions welcome.
+				</form>
+			</div>
+</div>
+    </body>
+</html>
+
