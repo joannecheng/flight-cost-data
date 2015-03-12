@@ -11,7 +11,7 @@ var map = po.map()
     .add(po.interact());
 
 map.add(po.image().url(po.url("http://{S}tile.cloudmade.com"
-    + "/9a0f2b8dc3d94c90b67b1e0d2a0792dd" 
+    + "/be67ad775f7f41ca88f38d3f64e355d7" 
    + "/998/256/{Z}/{X}/{Y}.png")
     .hosts(["a.", "b.", "c.", ""])));
 
